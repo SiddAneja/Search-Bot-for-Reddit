@@ -4,6 +4,7 @@ import numpy
 import pandas as pd
 import datetime as dt
 import getpass
+import webbrowser as web
 
 reddit_username = input('Enter your Reddit username: ')
 reddit_password = getpass.getpass('Enter your password: ')
@@ -30,7 +31,7 @@ def get_date(Created):
 
 search = input('What can I help you with?\n')
 
-for submission in all.search(search, limit=5):
+for submission in all.search(search, limit=10):
 	thread_dict["Title"].append(submission.title)
 	thread_dict["Score"].append(submission.score)
 	thread_dict["ID"].append(submission.id)
@@ -45,8 +46,39 @@ thread_data = pd.DataFrame(thread_dict) #pandas library to put all the data into
 timestampNew = (thread_data["Created"]).apply(get_date)
 thread_data = thread_data.assign(timestamp = timestampNew)
 
+#saves the data from reddit onto a .csv file
 thread_data.to_csv(r'C:\Users\Siddharth\Projects\RedditChatbot\browseReddit.csv', index=False)
+print('File saved')
 
-# titles = thread_data['Title']
-# print(titles[0:4])
-# choice = input('Select the ')
+titles = thread_data['Title'] #saves all the titles from the dataframe 
+print(titles[0:5]) #prints the first 5 titles to display them to the user
+print("\n")
+#Start of discussion with the user
+print('Enter "l" to load more, or ')
+while True:
+	print("Enter 'q' to Quit, or ")
+	choice = input('Enter the index of the article you like to get more information about: ')
+	#if the choice is a number enter this branch
+	if(choice.isdigit()):
+		#store the information from the dataframe at the index entered in a variable called info
+		info = thread_data.iloc[int(choice)]
+		print(info)
+		#prompt the user if they want to read the article on a browser
+		choice = input('Want to open this on Reddit? Enter Yes or No: ')
+		if(choice.lower() == 'yes'):
+			web.open(info.get('URL'))
+		elif(choice.lower() == 'no'):
+			continue
+		else:
+			print("Invalid Input")
+	#this branch checks if the user wants to load more data or quit
+	else:
+		if(choice == 'l' or choice == 'L'):
+			print(titles[5:])
+			print("\n")
+		elif(choice == 'q' or choice == 'Q'):
+			break
+		else:
+			print('Invalid input.')
+
+print("Thanks for using the Reddit Search Bot")
