@@ -1,10 +1,11 @@
-#! python3
 import praw
 import numpy
 import pandas as pd
 import datetime as dt
 import getpass
 import webbrowser as web
+# import pickle
+# import codecs
 
 reddit_username = input('Enter your Reddit username: ')
 reddit_password = getpass.getpass('Enter your password: ')
@@ -64,9 +65,20 @@ while True:
 		info = thread_data.iloc[int(choice)]
 		print(info)
 		#prompt the user if they want to read the article on a browser
-		choice = input('Want to open this on Reddit? Enter Yes or No: ')
+		choice = input('Want to open this on your browser? Enter Yes or No: ')
 		if(choice.lower() == 'yes'):
 			web.open(info.get('URL'))
+			#the following code saves the entire reddit post in a txt file
+			reddit.config.decode_html_entities = True
+			submission = reddit.submission(id=info.get('ID')) #extracts the submission using the id of the post
+			submission.comments.replace_more(limit=None) #uses the replace_more method to get rid of the morecomments and load all of them
+			#creates a file called comments.txt and saves the post to it
+			f = open('comments.txt', 'w+')
+			f.write(info.get('Title') + "\n")
+			f.write(info.get('Body') + "\n")
+			for comment in submission.comments.list():
+				f.write(str(comment.body.encode("utf-8")))
+
 		elif(choice.lower() == 'no'):
 			continue
 		else:
